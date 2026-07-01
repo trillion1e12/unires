@@ -230,8 +230,6 @@ class VLDecoder2(nn.Module):
         # upsample
         # (B,1,224,224)
         x = self.decoder(x)
-        # (B,224,224)
-        x = x.squeeze()
 
         return x
 
