@@ -1,3 +1,5 @@
 .vscode
 .dataset
 __pycache__
+.env
+runs

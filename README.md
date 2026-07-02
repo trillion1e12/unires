@@ -5,6 +5,24 @@
 [Unveiling Parts Beyond Objects:Towards Finer-Granularity Referring Expression Segmentation
 ](https://arxiv.org/abs/2312.08007)
 
+## How to run
+
+1. Create conda environment:
+
+    ```bash
+    conda create -n dl python=3.12 -y
+    conda activate dl
+    conda install numpy pandas seaborn matplotlib scikit-learn pytorch torchvision lightning timm transformers datasets tensorboard "setuptools<82" tqdm ipywidgets ipykernel gdown python-dotenv -c conda-forge -y
+    ```
+
+2. Set up `.env` file for environment variables: 
+
+    ```bash
+    cp .env.example .env
+    ```
+
+3. Follow below instruction
+
 ## Data
 
 - Logics for data processing and loading are in `data/`.

@@ -1,30 +1,20 @@
-from typing import Tuple, Dict, Any
-
+from typing import Dict
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from transformers import (
-    CLIPVisionModel,
-    CLIPTextModel,
-    CLIPTokenizer,
-    CLIPImageProcessor,
-    CLIPModel,
-)
-from transformers.modeling_outputs import BaseModelOutput
-import inspect
-
-MODEL_NAME = "openai/clip-vit-base-patch32"
+from transformers import CLIPVisionModel, CLIPTextModel
 
 
 class UniResImageEncoder(nn.Module):
     def __init__(self, image_encoder: CLIPVisionModel) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        d_model = self.image_encoder.config.hidden_size  # 768
-        self.low_tokens = nn.Parameter(torch.rand(64, d_model))
-        self.high_tokens = nn.Parameter(torch.rand(8, d_model))
 
-    def forward(self, pixel_values: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(
+        self,
+        pixel_values: torch.Tensor,
+        low_tokens: torch.Tensor,
+        high_tokens: torch.Tensor,
+    ) -> Dict[str, torch.Tensor]:
         # tokenize the image + positional embedding
         # (B,50,768)
         hidden_states = self.image_encoder.embeddings(pixel_values)
@@ -32,15 +22,21 @@ class UniResImageEncoder(nn.Module):
 
         # insert low level group tokens
         # (B,64,768)
-        low_tokens = self.low_tokens.unsqueeze(0).expand(batch_size, -1, -1)
+        low_tokens = low_tokens.unsqueeze(0).expand(batch_size, -1, -1)
         # (B,114,768)
         hidden_states = torch.cat((hidden_states, low_tokens), dim=1)
 
         # norm
         hidden_states = self.image_encoder.pre_layrnorm(hidden_states)
 
+        # find index of the middle of the transformer blocks
+        # 12
+        num_layers = len(self.image_encoder.encoder.layers)
+        # 6
+        mid_idx = num_layers // 2
+
         # first encoder half
-        for encoder_layer in self.image_encoder.encoder.layers[:6]:
+        for encoder_layer in self.image_encoder.encoder.layers[:mid_idx]:
             hidden_states = encoder_layer(hidden_states, attention_mask=None)
 
         # take out low level group tokens
@@ -50,12 +46,12 @@ class UniResImageEncoder(nn.Module):
 
         # insert high level group tokens
         # (B,8,768)
-        high_tokens = self.high_tokens.unsqueeze(0).expand(batch_size, -1, -1)
+        high_tokens = high_tokens.unsqueeze(0).expand(batch_size, -1, -1)
         # (B,58,768)
         hidden_states = torch.cat((hidden_states, high_tokens), dim=1)
 
         # second encoder half
-        for encoder_layer in self.image_encoder.encoder.layers[6:]:
+        for encoder_layer in self.image_encoder.encoder.layers[mid_idx:]:
             hidden_states = encoder_layer(hidden_states, attention_mask=None)
 
         # take out high level group tokens
@@ -94,6 +90,7 @@ class LanguageGuidedRegionFilter(nn.Module):
     def forward(
         self, group_feat: torch.Tensor, text_feat: torch.Tensor
     ) -> torch.Tensor:
+        # feature tensor shape stay at (B,L,512), L is number of group token (64 or 8)
         # cross attention
         normed_group = self.norm1(group_feat)
         fused_feat, _ = self.cross_attn(
@@ -131,6 +128,7 @@ class VLDecoderLayer(nn.Module):
         image_feat: torch.Tensor,
         text_feat: torch.Tensor,
     ) -> torch.Tensor:
+        # feature tensor shape stay at (B,50,512)
         # self attention
         normed_image = self.norm1(image_feat)
         image_feat_2, _ = self.self_attn(
@@ -236,23 +234,35 @@ class VLDecoder2(nn.Module):
 
 class UniRes(nn.Module):
     def __init__(
-        self, image_encoder: CLIPVisionModel, text_encoder: CLIPTextModel
+        self,
+        image_encoder: CLIPVisionModel,
+        text_encoder: CLIPTextModel,
+        num_low_tokens: int,
+        num_high_tokens: int,
+        d_model: int,
+        nhead: int,
+        dim_feedforward: int,
+        num_layers: int,
     ) -> None:
         super().__init__()
 
+        # clip image and text encoder
         self.image_encoder = UniResImageEncoder(image_encoder)
         self.text_encoder = text_encoder
-        self.image_projection = nn.Linear(768, 512)
-        self.text_projection = nn.Linear(512, 512)
 
-        d_model = 512
-        nhead = 8
-        dim_feedforward = d_model * 4
+        image_dmodel = image_encoder.config.hidden_size
+        text_dmodel = text_encoder.config.hidden_size
+
+        self.low_tokens = nn.Parameter(torch.rand(num_low_tokens, image_dmodel))
+        self.high_tokens = nn.Parameter(torch.rand(num_high_tokens, image_dmodel))
+
+        self.image_projection = nn.Linear(image_dmodel, d_model)
+        self.text_projection = nn.Linear(text_dmodel, d_model)
 
         self.lrf = LanguageGuidedRegionFilter(d_model, nhead, dim_feedforward)
 
-        self.decoder1 = VLDecoder1(d_model, nhead, dim_feedforward, num_layers=12)
-        self.decoder2 = VLDecoder2(d_model, nhead, dim_feedforward, num_layers=12)
+        self.decoder1 = VLDecoder1(d_model, nhead, dim_feedforward, num_layers)
+        self.decoder2 = VLDecoder2(d_model, nhead, dim_feedforward, num_layers)
 
     def forward(
         self,
@@ -261,7 +271,7 @@ class UniRes(nn.Module):
         attention_mask: torch.Tensor,
     ) -> torch.Tensor:
         # clip image
-        image_out = self.image_encoder(pixel_values)
+        image_out = self.image_encoder(pixel_values, self.low_tokens, self.high_tokens)
         # (B,50,768)
         image_feat = image_out["last_hidden_state"]
         # (B,64,768)
