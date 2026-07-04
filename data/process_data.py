@@ -1,21 +1,16 @@
-from transformers import (
-    CLIPTokenizer,
-    CLIPImageProcessor,
-)
+from transformers import CLIPTokenizer, CLIPImageProcessor
 from datasets import load_dataset, concatenate_datasets, DatasetDict
 from PIL import Image, ImageDraw
 from torchvision import transforms
-
-MODEL_NAME = "openai/clip-vit-base-patch32"
-SAVE_DATA_PATH = "data/.dataset/"
+from config import CLIP_MODEL_NAME, DATASET_NAME, SAVE_DATA_PATH
 
 print("Downloading dataset and CLIP tokenizer + image processor")
 
-ds = load_dataset("lmms-lab/RefCOCO")
+ds = load_dataset(DATASET_NAME)
 combined_ds = concatenate_datasets([ds["val"], ds["test"], ds["testA"], ds["testB"]])
 
-tokenizer = CLIPTokenizer.from_pretrained(MODEL_NAME)
-processor = CLIPImageProcessor.from_pretrained(MODEL_NAME)
+tokenizer = CLIPTokenizer.from_pretrained(CLIP_MODEL_NAME)
+processor = CLIPImageProcessor.from_pretrained(CLIP_MODEL_NAME)
 to_tensor = transforms.ToTensor()
 
 
@@ -35,8 +30,9 @@ def process_data(batch):
             (polygon[i * 2], polygon[i * 2 + 1]) for i in range(len(polygon) // 2)
         ]
         img_draw.polygon(vertices, fill=1)
-        mask_tensor = to_tensor(mask_img.resize((224, 224))).bool()
-        seg_masks.append(mask_tensor)
+        mask_img = mask_img.resize((224, 224))
+        mask_tensor = to_tensor(mask_img)
+        seg_masks.append(mask_tensor.squeeze(0).bool())
 
     return {
         "pixel_values": image_inputs["pixel_values"],
