@@ -7,7 +7,7 @@
 
 ## How to run
 
-1. Create conda environment:
+1. Create conda environment (optional, just need the required packages is enough, can use pip):
 
     ```bash
     conda create -n dl python=3.12 -y
@@ -21,7 +21,21 @@
     cp .env.example .env
     ```
 
-3. Follow below instruction
+    Tune the variable to suit your config.
+
+3. Process dataset:
+
+    ```bash
+    python -m data.process_data
+    ```
+
+4. Begin training:
+
+    ```bash
+    python main.py
+    ```
+
+Read more below for more information.
 
 ## Data
 
@@ -86,4 +100,9 @@
 
 ## Training
 
-...
+- Logics for training are in `train/`.
+
+    - **Loss function:** `train/utils.py`
+    - **Train loop:** `train/train.py`
+
+- `main.py` contain the logic for loading data, model, configs, and main loop.

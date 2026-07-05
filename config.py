@@ -22,6 +22,7 @@ NUM_LAYERS = int(os.getenv("NUM_LAYERS"))
 # training
 LOG_DIR: str = os.getenv("LOG_DIR")
 LOG_INTERVAL = int(os.getenv("LOG_INTERVAL"))
+VAL_INTERVAL = int(os.getenv("VAL_INTERVAL"))
 SEED = int(os.getenv("SEED"))
 LEARNING_RATE = float(os.getenv("LEARNING_RATE"))
 MAX_EPOCHS = int(os.getenv("MAX_EPOCHS"))
