@@ -35,6 +35,8 @@
     python main.py
     ```
 
+You can see the train graph by running `tensorboard --logdir=runs` (if you changed the `LOG_DIR` in `.env`, replace `runs` to the new name). Then access [http://localhost:6006/](http://localhost:6006/)
+
 Read more below for more information.
 
 ## Data
