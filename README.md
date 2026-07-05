@@ -7,7 +7,7 @@
 
 ## How to run
 
-1. Create conda environment:
+1. Create conda environment (optional, just need the required packages is enough, can use pip):
 
     ```bash
     conda create -n dl python=3.12 -y
@@ -21,7 +21,23 @@
     cp .env.example .env
     ```
 
-3. Follow below instruction
+    Tune the variable to suit your config.
+
+3. Process dataset:
+
+    ```bash
+    python -m data.process_data
+    ```
+
+4. Begin training:
+
+    ```bash
+    python main.py
+    ```
+
+You can see the train graph by running `tensorboard --logdir=runs` (if you changed the `LOG_DIR` in `.env`, replace `runs` to the new name). Then access [http://localhost:6006/](http://localhost:6006/)
+
+Read more below for more information.
 
 ## Data
 
@@ -36,7 +52,7 @@
     1. Download and process data to store on disk:
 
         ```bash
-        python data/process_data.py
+        python -m data.process_data
         ```
     
     2. Confirm that data has been stored at `data/.dataset/` by manually checking that directory.
@@ -53,7 +69,7 @@
     - `pixel_values`: $(B, 3, 224, 224)$ - the image tensor
     - `input_ids`: $(B, S)$ - text input id tensor
     - `attention_mask`: $(B, S)$ - text attention mask tensor
-    - `seg_masks`: $(B, 1, 224, 224)$ - segmentation mask tensor, with binary value 0 and 1.
+    - `seg_masks`: $(B, 224, 224)$ - segmentation mask tensor, with binary value 0 and 1.
 
 - You can run `python example_load_data.py` or read it to see how it work.
 
@@ -76,13 +92,19 @@
         ```
 
 - Overview input and output shapes of model, with $B$ as batch size and $S$ as text sequence length:
-    - `pixel_values`: $(B, 3, 224, 224)$ - the image tensor
-    - `input_ids`: $(B, S)$ - text input id tensor
-    - `attention_mask`: $(B, S)$ - text attention mask tensor
-    - `seg_masks`: $(B, 1, 224, 224)$ - segmentation mask logit tensor, with float values.
+    - Input:
+        - `pixel_values`: $(B, 3, 224, 224)$ - the image tensor
+        - `input_ids`: $(B, S)$ - text input id tensor
+        - `attention_mask`: $(B, S)$ - text attention mask tensor
+    - Output: $(B, 224, 224)$ - segmentation mask logit tensor, with float values.
 
 - You can run `python example_load_model.py` or read it to see how it work.
 
 ## Training
 
-...
+- Logics for training are in `train/`.
+
+    - **Loss function:** `train/utils.py`
+    - **Train loop:** `train/train.py`
+
+- `main.py` contain the logic for loading data, model, configs, and main loop.
