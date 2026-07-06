@@ -54,3 +54,9 @@ def calculate_miou_oiou(
     oiou = total_intersection / (total_union + IOU_EPSILON)
 
     return miou, oiou
+
+
+class TrainRecord:
+    def __init__(self) -> None:
+        self.best_val_loss = float("inf")
+        self.no_improve_count = 0

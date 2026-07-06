@@ -1,11 +1,21 @@
+import os
+
 import torch
 from torch.optim import AdamW
 from torch.utils.tensorboard import SummaryWriter
-from config import LEARNING_RATE, LOG_DIR, MAX_EPOCHS, SAVE_DATA_PATH, SEED
+from config import (
+    CHECKPOINT_DIR,
+    LEARNING_RATE,
+    LOG_DIR,
+    MAX_EPOCHS,
+    PATIENCE,
+    SAVE_DATA_PATH,
+    SEED,
+)
 from data.load_data import get_dataloaders
 from model.load_model import get_unires_model
 from train.train import train_loop
-from train.utils import loss_fn
+from train.utils import TrainRecord, loss_fn
 
 
 def main():
@@ -17,12 +27,25 @@ def main():
     model.to(device)
     optimizer = AdamW(model.parameters(), LEARNING_RATE)
     writer = SummaryWriter(LOG_DIR)
+    record = TrainRecord()
+    os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
     # training
     for epoch in range(MAX_EPOCHS):
         train_loop(
-            train_loader, val_loader, model, optimizer, loss_fn, writer, device, epoch
+            train_loader,
+            val_loader,
+            model,
+            optimizer,
+            loss_fn,
+            writer,
+            device,
+            epoch,
+            record,
         )
+
+        if record.no_improve_count > PATIENCE:
+            break
 
 
 if __name__ == "__main__":

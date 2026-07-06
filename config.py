@@ -21,6 +21,7 @@ NUM_LAYERS = int(os.getenv("NUM_LAYERS"))
 
 # training
 LOG_DIR: str = os.getenv("LOG_DIR")
+CHECKPOINT_DIR: str = os.getenv("CHECKPOINT_DIR")
 LOG_INTERVAL = int(os.getenv("LOG_INTERVAL"))
 VAL_INTERVAL = int(os.getenv("VAL_INTERVAL"))
 SEED = int(os.getenv("SEED"))

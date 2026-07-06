@@ -1,12 +1,14 @@
+import os
+
 import torch
 from tqdm.auto import tqdm
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 from torch.utils.tensorboard import SummaryWriter
 from typing import Callable
-from config import LOG_INTERVAL, VAL_INTERVAL
+from config import CHECKPOINT_DIR, LOG_INTERVAL, PATIENCE, VAL_INTERVAL
 from model.unires import UniRes
-from train.utils import calculate_miou_oiou
+from train.utils import TrainRecord, calculate_miou_oiou
 
 
 def eval_loop(
@@ -16,7 +18,7 @@ def eval_loop(
     writer: SummaryWriter,
     device: str,
     global_step: int,
-) -> None:
+) -> float:
     model.eval()
 
     num_batches = len(dataloader)
@@ -49,17 +51,21 @@ def eval_loop(
             total_miou += miou
             total_oiou += oiou
 
+    loss = total_loss / num_batches
+
     # write log
     writer.add_scalars(
         "validate",
         {
-            "loss": total_loss / num_batches,
+            "loss": loss,
             "accuracy": total_accuracy / num_batches,
             "miou": total_miou / num_batches,
             "oiou": total_oiou / num_batches,
         },
         global_step,
     )
+
+    return loss
 
 
 def train_loop(
@@ -71,8 +77,10 @@ def train_loop(
     writer: SummaryWriter,
     device: str,
     epoch_idx: int,
+    record: TrainRecord,
 ) -> None:
     model.train()
+
     num_batches = len(train_loader)
 
     for batch_idx, batch in enumerate(
@@ -111,6 +119,18 @@ def train_loop(
                 global_step,
             )
 
-        # validation
+        # validation, checkpoint, and early stopping
         if batch_idx % VAL_INTERVAL == 0:
-            eval_loop(val_loader, model, loss_fn, writer, device, global_step)
+            val_loss = eval_loop(
+                val_loader, model, loss_fn, writer, device, global_step
+            )
+
+            if val_loss < record.best_val_loss:
+                checkpoint_path = os.path.join(CHECKPOINT_DIR, f"{global_step}.pth")
+                torch.save(model.state_dict(), checkpoint_path)
+                record.best_val_loss = val_loss
+                record.no_improve_count = 0
+            else:
+                record.no_improve_count += 1
+                if record.no_improve_count > PATIENCE:
+                    break
