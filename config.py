@@ -29,3 +29,4 @@ MAX_EPOCHS = int(os.getenv("MAX_EPOCHS"))
 PATIENCE = int(os.getenv("PATIENCE"))
 DICE_SMOOTH = float(os.getenv("DICE_SMOOTH"))
 IOU_EPSILON = float(os.getenv("IOU_EPSILON"))
+FREEEZE_CLIP = os.getenv("FREEEZE_CLIP") == "1"

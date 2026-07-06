@@ -1,6 +1,7 @@
 from transformers import CLIPVisionModel, CLIPTextModel
 from config import (
     CLIP_MODEL_NAME,
+    FREEEZE_CLIP,
     NUM_LOW_TOKENS,
     NUM_HIGH_TOKENS,
     D_MODEL,
@@ -14,6 +15,7 @@ from model.unires import UniRes
 def get_unires_model() -> UniRes:
     clip_vision_model = CLIPVisionModel.from_pretrained(CLIP_MODEL_NAME)
     clip_text_model = CLIPTextModel.from_pretrained(CLIP_MODEL_NAME)
+
     model = UniRes(
         clip_vision_model,
         clip_text_model,
@@ -24,4 +26,11 @@ def get_unires_model() -> UniRes:
         DIM_FEEDFORWARD,
         NUM_LAYERS,
     )
+
+    if FREEEZE_CLIP:
+        for param in clip_vision_model.parameters():
+            param.requires_grad = False
+        for param in clip_text_model.parameters():
+            param.requires_grad = False
+
     return model
