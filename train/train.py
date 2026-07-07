@@ -126,11 +126,12 @@ def train_loop(
             )
 
             if val_loss < record.best_val_loss:
-                checkpoint_path = os.path.join(CHECKPOINT_DIR, f"{global_step}.pth")
+                checkpoint_path = os.path.join(CHECKPOINT_DIR, "checkpoint.pth")
                 torch.save(model.state_dict(), checkpoint_path)
                 record.best_val_loss = val_loss
                 record.no_improve_count = 0
             else:
                 record.no_improve_count += 1
                 if record.no_improve_count > PATIENCE:
+                    print(f"Early stopping at epoch {epoch_idx}, batch {batch_idx}")
                     break
