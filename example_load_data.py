@@ -1,4 +1,4 @@
-from config import SAVE_DATA_PATH
+from config.config import SAVE_DATA_PATH
 from data.load_data import get_dataloaders
 
 train_loader, val_loader, test_loader = get_dataloaders(SAVE_DATA_PATH)

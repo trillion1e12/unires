@@ -2,7 +2,7 @@ from transformers import CLIPTokenizer, CLIPImageProcessor
 from datasets import load_dataset, concatenate_datasets, DatasetDict
 from PIL import Image, ImageDraw
 from torchvision import transforms
-from config import CLIP_MODEL_NAME, DATASET_NAME, SAVE_DATA_PATH
+from config.config import CLIP_MODEL_NAME, DATASET_NAME, SAVE_DATA_PATH
 
 print("Downloading dataset and CLIP tokenizer + image processor")
 

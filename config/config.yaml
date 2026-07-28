@@ -1,0 +1,31 @@
+clip:
+  model_name: "openai/clip-vit-base-patch32"
+
+dataset:
+  name: "lmms-lab/RefCOCO"
+  save_data_path: "data/.dataset/"
+
+dataloader:
+  batch_size: 32
+  num_workers: 2
+
+model:
+  num_low_tokens: 64
+  num_high_tokens: 8
+  d_model: 512
+  nhead: 8
+  dim_feedforward: 2048
+  num_layers: 6
+
+training:
+  log_dir: null
+  checkpoint_dir: ".checkpoint/"
+  log_interval: 50
+  val_interval: 200
+  seed: 42
+  learning_rate: 3e-5
+  max_epochs: 50
+  patience: 10
+  dice_smooth: 1e-6
+  iou_epsilon: 1e-6
+  freeze_clip: true

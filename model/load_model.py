@@ -1,13 +1,14 @@
-from transformers import CLIPVisionModel, CLIPTextModel
-from config import (
+from transformers import CLIPTextModel, CLIPVisionModel
+
+from config.config import (
     CLIP_MODEL_NAME,
-    FREEEZE_CLIP,
-    NUM_LOW_TOKENS,
-    NUM_HIGH_TOKENS,
     D_MODEL,
-    NHEAD,
     DIM_FEEDFORWARD,
+    FREEZE_CLIP,
+    NHEAD,
+    NUM_HIGH_TOKENS,
     NUM_LAYERS,
+    NUM_LOW_TOKENS,
 )
 from model.unires import UniRes
 
@@ -27,7 +28,7 @@ def get_unires_model() -> UniRes:
         NUM_LAYERS,
     )
 
-    if FREEEZE_CLIP:
+    if FREEZE_CLIP:
         for param in clip_vision_model.parameters():
             param.requires_grad = False
         for param in clip_text_model.parameters():

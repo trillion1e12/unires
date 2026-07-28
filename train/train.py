@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 from torch.utils.tensorboard import SummaryWriter
 from typing import Callable
-from config import CHECKPOINT_DIR, LOG_INTERVAL, PATIENCE, VAL_INTERVAL
+from config.config import CHECKPOINT_DIR, LOG_INTERVAL, PATIENCE, VAL_INTERVAL
 from model.unires import UniRes
 from train.utils import TrainRecord, calculate_miou_oiou
 

@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from config import DICE_SMOOTH, IOU_EPSILON
+from config.config import DICE_SMOOTH, IOU_EPSILON
 from typing import Tuple
 
 

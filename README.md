@@ -15,13 +15,7 @@
 
    Then `conda activate dl`
 
-2. Set up `.env` file for environment variables:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Tune the variable to suit your config.
+2. Tune the variables in `config/config.yaml` to suit your configuration.
 
 3. Process dataset:
 
@@ -110,5 +104,5 @@ Read more below for more information.
   ```bash
   conda create -n dl python=3.12 -y
   conda activate dl
-  conda install numpy pandas seaborn matplotlib scikit-learn pytorch torchvision lightning timm transformers datasets tensorboard "setuptools<82" tqdm ipywidgets ipykernel gdown python-dotenv -c conda-forge -y
+  conda install numpy pandas seaborn matplotlib scikit-learn pytorch torchvision lightning timm transformers datasets tensorboard "setuptools<82" tqdm ipywidgets ipykernel gdown python-dotenv yaml -c conda-forge -y
   ```

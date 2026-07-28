@@ -11,7 +11,7 @@ metadata:
   sources:
     - ''
   time_metadata:
-    created_at: '2026-07-28T15:06:46Z'
+    created_at: '2026-07-28T15:29:20Z'
   custom_metadata:
     created_by: conda-lockfiles 0.2.0
 package:
@@ -3013,29 +3013,29 @@ package:
     category: main
     optional: false
   - name: ca-certificates
-    version: 2026.6.17
+    version: 2026.7.22
     manager: conda
     platform: linux-64
     dependencies:
       __unix: ''
     url: 
-      https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.6.17-hbd8a1cb_0.conda
+      https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
     hash:
-      md5: a9965dd99f683c5f444428f896635716
-      sha256: f8e3c730fa14ee3f170493779f06522c4acf89169f43db4f039727709b6419cf
+      md5: 0f51e2391ade309db462a55611263e9c
+      sha256: 0a0544cf95f64394fe4959286f5c71f5444ad58feb0602e53becb27448d24da6
     category: main
     optional: false
   - name: certifi
-    version: 2026.6.17
+    version: 2026.7.22
     manager: conda
     platform: linux-64
     dependencies:
       python: '>=3.10'
     url: 
-      https://conda.anaconda.org/conda-forge/noarch/certifi-2026.6.17-pyhd8ed1ab_0.conda
+      https://conda.anaconda.org/conda-forge/noarch/certifi-2026.7.22-pyhd8ed1ab_0.conda
     hash:
-      md5: c13824fedced67005d3832c152fe9c2f
-      sha256: 6c13620e458ba43278379d0cdacc30c497336bddfda81681fd50d114a65c702f
+      md5: 37e13edbe3b48f1095a9d085ef9cd83b
+      sha256: fb167de4388e64e52aa3907ed099afab944c1fa6e5f74b281a312dae1bcf7f3b
     category: main
     optional: false
   - name: charset-normalizer
