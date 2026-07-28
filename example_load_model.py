@@ -1,5 +1,6 @@
 import torch
 from transformers import CLIPTokenizer
+
 from model.load_model import get_unires_model
 
 MODEL_NAME = "openai/clip-vit-base-patch32"
