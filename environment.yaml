@@ -1,0 +1,27 @@
+name: dl
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - numpy
+  - ipywidgets
+  - pandas
+  - seaborn
+  - setuptools[version='<82']
+  - transformers
+  - scikit-learn
+  - pytorch
+  - lightning
+  - timm
+  - ipykernel
+  - tensorboard
+  - torchvision
+  - tqdm
+  - datasets
+  - gdown
+  - matplotlib
+  - ruff
+  - python-dotenv
+  - kaggle
+  - yaml
+prefix: /home/minht/miniconda3/envs/dl
