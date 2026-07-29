@@ -25,6 +25,7 @@ jobs:
           environment-file: environment.yaml
           python-version: 3.12.13
           auto-activate: false
+          channels: conda-forge
 
       - name: Check format and lint
         run: |
