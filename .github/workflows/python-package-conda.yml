@@ -21,8 +21,9 @@ jobs:
           auto-update-conda: false
           activate-environment: explicit-env
           environment-file: conda-lock.yaml
-      
+
       - name: Check format and lint
         run: |
+          conda env list
           ruff format --check
           ruff check
