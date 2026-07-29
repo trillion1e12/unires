@@ -23,6 +23,7 @@ jobs:
           environment-file: conda-lock.yaml
 
       - name: Check format and lint
+        shell: bash -el {0}
         run: |
           conda env list
           ruff format --check
