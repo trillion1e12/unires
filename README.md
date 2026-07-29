@@ -10,7 +10,7 @@
 1. Create conda environment:
 
    ```bash
-   conda create --name dl --file conda-lock.yaml
+   conda create --name dl --file environment.yaml -c conda-forge
    ```
 
    Then `conda activate dl`
@@ -105,4 +105,10 @@ Read more below for more information.
   conda create -n dl python=3.12 -y
   conda activate dl
   conda install numpy pandas seaborn matplotlib scikit-learn pytorch torchvision lightning timm transformers datasets tensorboard "setuptools<82" tqdm ipywidgets ipykernel gdown python-dotenv yaml -c conda-forge -y
+  ```
+
+- The command used for creating `environment.yaml`:
+
+  ```bash
+  conda export --from-history > environment.yaml
   ```
