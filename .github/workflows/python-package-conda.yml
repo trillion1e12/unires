@@ -11,6 +11,9 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -18,12 +21,12 @@ jobs:
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v4.0.1
         with:
-          auto-update-conda: false
-          activate-environment: explicit-env
+          activate-environment: anaconda-client-env
           environment-file: conda-lock.yaml
+          python-version: 3.12.13
+          auto-activate: false
 
       - name: Check format and lint
-        shell: bash -el {0}
         run: |
           ruff format --check
           ruff check
