@@ -19,7 +19,7 @@ from train.train import train_loop
 from train.utils import TrainRecord, loss_fn
 
 
-def main(): 
+def main():
     # set up model and dataloader
     torch.manual_seed(SEED)
     device = "cuda" if torch.cuda.is_available() else "cpu"
