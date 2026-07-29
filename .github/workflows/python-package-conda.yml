@@ -22,7 +22,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v4.0.1
         with:
           activate-environment: anaconda-client-env
-          environment-file: conda-lock.yaml
+          environment-file: environment.yaml
           python-version: 3.12.13
           auto-activate: false
 
