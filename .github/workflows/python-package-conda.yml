@@ -1,0 +1,28 @@
+name: Python Package using Conda
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v4.0.1
+        with:
+          auto-update-conda: false
+          activate-environment: explicit-env
+          environment-file: conda-lock.yaml
+      
+      - name: Check format and lint
+        run: |
+          ruff format --check
+          ruff check
