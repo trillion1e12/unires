@@ -13,7 +13,7 @@ def get_dataloaders(path: str) -> Tuple[DataLoader, DataLoader, DataLoader]:
     collator = DataCollatorWithPadding(tokenizer)
 
     train_loader = DataLoader(
-        ds["train"], # type: ignore
+        ds["train"],  # type: ignore
         batch_size=BATCH_SIZE,
         shuffle=True,
         num_workers=NUM_WORKERS,
@@ -21,7 +21,7 @@ def get_dataloaders(path: str) -> Tuple[DataLoader, DataLoader, DataLoader]:
     )
 
     val_loader = DataLoader(
-        ds["val"], # type: ignore
+        ds["val"],  # type: ignore
         batch_size=BATCH_SIZE,
         shuffle=False,
         num_workers=NUM_WORKERS,
@@ -29,7 +29,7 @@ def get_dataloaders(path: str) -> Tuple[DataLoader, DataLoader, DataLoader]:
     )
 
     test_loader = DataLoader(
-        ds["test"], # type: ignore
+        ds["test"],  # type: ignore
         batch_size=BATCH_SIZE,
         shuffle=False,
         num_workers=NUM_WORKERS,
