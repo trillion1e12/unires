@@ -1,20 +1,19 @@
-from torch.utils.data import DataLoader
 from typing import Tuple
-from transformers import DataCollatorWithPadding, CLIPTokenizer
-from datasets import load_from_disk
 
-MODEL_NAME = "openai/clip-vit-base-patch32"
-BATCH_SIZE = 32
-NUM_WORKERS = 2
+from datasets import load_from_disk
+from torch.utils.data import DataLoader
+from transformers import CLIPTokenizer, DataCollatorWithPadding
+
+from config.config import BATCH_SIZE, CLIP_MODEL_NAME, NUM_WORKERS
 
 
 def get_dataloaders(path: str) -> Tuple[DataLoader, DataLoader, DataLoader]:
     ds = load_from_disk(path)
-    tokenizer = CLIPTokenizer.from_pretrained(MODEL_NAME)
+    tokenizer = CLIPTokenizer.from_pretrained(CLIP_MODEL_NAME)
     collator = DataCollatorWithPadding(tokenizer)
 
     train_loader = DataLoader(
-        ds["train"],
+        ds["train"],  # type: ignore
         batch_size=BATCH_SIZE,
         shuffle=True,
         num_workers=NUM_WORKERS,
@@ -22,7 +21,7 @@ def get_dataloaders(path: str) -> Tuple[DataLoader, DataLoader, DataLoader]:
     )
 
     val_loader = DataLoader(
-        ds["val"],
+        ds["val"],  # type: ignore
         batch_size=BATCH_SIZE,
         shuffle=False,
         num_workers=NUM_WORKERS,
@@ -30,7 +29,7 @@ def get_dataloaders(path: str) -> Tuple[DataLoader, DataLoader, DataLoader]:
     )
 
     test_loader = DataLoader(
-        ds["test"],
+        ds["test"],  # type: ignore
         batch_size=BATCH_SIZE,
         shuffle=False,
         num_workers=NUM_WORKERS,

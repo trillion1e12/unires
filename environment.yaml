@@ -24,4 +24,5 @@ dependencies:
   - python-dotenv
   - kaggle
   - yaml
+  - pyright
 prefix: /home/minht/miniconda3/envs/dl

@@ -27,7 +27,8 @@ jobs:
           auto-activate: false
           channels: conda-forge
 
-      - name: Check format and lint
+      - name: Check format, lint, and type
         run: |
           ruff format --check
           ruff check
+          pyright
