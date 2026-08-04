@@ -15,7 +15,7 @@ from config.config import (
 )
 from data.load_data import get_dataloaders
 from model.load_model import get_unires_model
-from train.train import train_loop
+from train.train import eval_loop, train_loop
 from train.utils import TrainRecord, loss_fn
 
 
@@ -47,6 +47,9 @@ def main():
 
         if record.no_improve_count > PATIENCE:
             break
+
+    # eval on test set
+    eval_loop(test_loader, model, loss_fn, writer, device, 0, True)
 
 
 if __name__ == "__main__":
