@@ -123,9 +123,11 @@ def train_loop(
 
         # validation, checkpoint, and early stopping
         if batch_idx % VAL_INTERVAL == 0:
+            model.eval()
             val_loss = eval_loop(
                 val_loader, model, loss_fn, writer, device, global_step
             )
+            model.train()
 
             if val_loss < record.best_val_loss:
                 checkpoint_path = os.path.join(CHECKPOINT_DIR, "checkpoint.pth")
