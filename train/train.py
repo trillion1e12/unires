@@ -1,11 +1,12 @@
 import os
+from typing import Callable
 
 import torch
-from tqdm.auto import tqdm
-from torch.utils.data import DataLoader
 from torch.optim import Optimizer
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from typing import Callable
+from tqdm.auto import tqdm
+
 from config.config import CHECKPOINT_DIR, LOG_INTERVAL, PATIENCE, VAL_INTERVAL
 from model.unires import UniRes
 from train.utils import TrainRecord, calculate_miou_oiou
@@ -18,6 +19,7 @@ def eval_loop(
     writer: SummaryWriter,
     device: str,
     global_step: int,
+    is_test: bool = False,
 ) -> float:
     model.eval()
 
@@ -29,7 +31,7 @@ def eval_loop(
 
     with torch.no_grad():
         for batch_idx, batch in enumerate(
-            tqdm(dataloader, desc="Evaluating", leave=False)
+            tqdm(dataloader, desc="Testing" if is_test else "Validating", leave=False)
         ):
             # extract batch data
             pixel_values = batch["pixel_values"].to(device)
@@ -55,7 +57,7 @@ def eval_loop(
 
     # write log
     writer.add_scalars(
-        "validate",
+        "test" if is_test else "validate",
         {
             "loss": loss,
             "accuracy": total_accuracy / num_batches,
