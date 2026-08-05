@@ -23,7 +23,7 @@ DIM_FEEDFORWARD: int = config["model"]["dim_feedforward"]
 NUM_LAYERS: int = config["model"]["num_layers"]
 
 # training
-LOG_DIR: str = config["training"]["log_dir"]
+TB_LOG_DIR: str = config["training"]["log_dir"]
 CHECKPOINT_DIR: str = config["training"]["checkpoint_dir"]
 LOG_INTERVAL: int = config["training"]["log_interval"]
 VAL_INTERVAL: int = config["training"]["val_interval"]
@@ -34,3 +34,11 @@ PATIENCE: int = config["training"]["patience"]
 DICE_SMOOTH = float(config["training"]["dice_smooth"])
 IOU_EPSILON = float(config["training"]["iou_epsilon"])
 FREEZE_CLIP: bool = config["training"]["freeze_clip"]
+
+# logging
+LOG_DIR: str = config["logging"]["log_dir"]
+LOG_FILE: str = config["logging"]["log_file"]
+LOG_MAX_BYTES: int = config["logging"]["max_bytes"]
+LOG_BACKUP_COUNT: int = config["logging"]["backup_count"]
+LOG_CONSOLE_LEVEL: str = config["logging"]["console_level"]
+LOG_FILE_LEVEL: str = config["logging"]["file_level"]

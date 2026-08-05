@@ -25,4 +25,5 @@ dependencies:
   - kaggle
   - yaml
   - pyright
+  - rich
 prefix: /home/minht/miniconda3/envs/dl
