@@ -1,4 +1,5 @@
 import argparse
+import gc
 import os
 import subprocess
 import sys
@@ -88,6 +89,37 @@ def main():
     except Exception:
         logger.exception("Training failed with error")
         raise
+    finally:
+        _cleanup(logger, writer, model, optimizer, train_loader, val_loader, test_loader, device)
+
+
+def _cleanup(logger, writer, model, optimizer, train_loader, val_loader, test_loader, device):
+    logger.info("Releasing GPU resources")
+
+    writer.close()
+    logger.info("TensorBoard writer closed")
+
+    if device == "cuda":
+        model.to("cpu")
+        logger.info("Model moved to CPU")
+
+    for obj in [model, optimizer, train_loader, val_loader, test_loader]:
+        del obj
+
+    gc.collect()
+
+    if device == "cuda":
+        allocated = torch.cuda.memory_allocated() / 1024**3
+        reserved = torch.cuda.memory_reserved() / 1024**3
+        logger.info("GPU memory before cleanup — allocated: %.2f GiB, reserved: %.2f GiB", allocated, reserved)
+
+        torch.cuda.empty_cache()
+
+        allocated = torch.cuda.memory_allocated() / 1024**3
+        reserved = torch.cuda.memory_reserved() / 1024**3
+        logger.info("GPU memory after cleanup — allocated: %.2f GiB, reserved: %.2f GiB", allocated, reserved)
+
+    logger.info("GPU resources released")
 
 
 if __name__ == "__main__":

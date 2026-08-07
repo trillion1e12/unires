@@ -168,67 +168,89 @@ class VLDecoder1(nn.Module):
         return x
 
 
+class SpatialSelfAttention(nn.Module):
+    def __init__(self, channels: int, nhead: int) -> None:
+        super().__init__()
+        self.attn = nn.MultiheadAttention(channels, nhead, batch_first=True)
+        self.norm = nn.LayerNorm(channels)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        B, C, H, W = x.shape
+        x_flat = x.reshape(B, C, H * W).transpose(1, 2)
+        normed = self.norm(x_flat)
+        attn_out, _ = self.attn(normed, normed, normed)
+        x_flat = x_flat + attn_out
+        x = x_flat.transpose(1, 2).reshape(B, C, H, W)
+        return x
+
+
 class VLDecoder2(nn.Module):
     def __init__(self, d_model, nhead, dim_feedforward, num_layers) -> None:
         super().__init__()
 
-        # transformer
         self.layers = nn.ModuleList(
             [VLDecoderLayer(d_model, nhead, dim_feedforward) for _ in range(num_layers)]
         )
 
-        # upsample
-        self.decoder = nn.Sequential(
-            # (B,512,7,7) to (B,256,14,14)
-            nn.ConvTranspose2d(d_model, 256, kernel_size=2, stride=2),
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-            # (B,256,14,14) to (B,128,28, 28)
-            nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            # (B,128,28,28) to (B,64,56,56)
+        self.up1_conv = nn.ConvTranspose2d(d_model, 256, kernel_size=2, stride=2)
+        self.up1_bn = nn.BatchNorm2d(256)
+        self.up1_act = nn.ReLU()
+        up1_nhead = self._valid_nhead(256, nhead)
+        self.up1_attn = nn.ModuleList(
+            [SpatialSelfAttention(256, up1_nhead) for _ in range(num_layers)]
+        )
+
+        self.up2_conv = nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2)
+        self.up2_bn = nn.BatchNorm2d(128)
+        self.up2_act = nn.ReLU()
+        up2_nhead = self._valid_nhead(128, nhead)
+        self.up2_attn = nn.ModuleList(
+            [SpatialSelfAttention(128, up2_nhead) for _ in range(num_layers)]
+        )
+
+        self.tail = nn.Sequential(
             nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2),
             nn.BatchNorm2d(64),
             nn.ReLU(),
-            # (B,64,56,56) to (B,32,112,112)
             nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            # (B,32,112,112) to (B,16,224,224)
             nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
-            # (B,16,224,224) to (B,1,224,224)
             nn.Conv2d(16, 1, kernel_size=1),
         )
+
+    @staticmethod
+    def _valid_nhead(channels: int, nhead: int) -> int:
+        while nhead > 0 and channels % nhead != 0:
+            nhead -= 1
+        return max(1, nhead)
 
     def forward(
         self, image_feat: torch.Tensor, group_feat: torch.Tensor
     ) -> torch.Tensor:
-        # transformer blocks
-        # (B,50,512)
         x = image_feat
         for layer in self.layers:
-            # (B,50,512)
             x = layer(x, group_feat)
 
-        # reshape for cnn
-        # (B,49,512)
         x = x[:, 1:, :]
         batch_size, seq_len, d_model = x.shape
 
-        # (B,512,49)
         x = x.transpose(1, 2)
 
-        height = width = int(seq_len**0.5)
-        # (B,512,7,7)
+        height = width = int(seq_len ** 0.5)
         x = x.reshape(batch_size, d_model, height, width)
 
-        # upsample
-        # (B,1,224,224)
-        x = self.decoder(x)
-        # (B,224,224)
+        x = self.up1_act(self.up1_bn(self.up1_conv(x)))
+        for attn in self.up1_attn:
+            x = attn(x)
+
+        x = self.up2_act(self.up2_bn(self.up2_conv(x)))
+        for attn in self.up2_attn:
+            x = attn(x)
+
+        x = self.tail(x)
         x = x.squeeze(1)
 
         return x
